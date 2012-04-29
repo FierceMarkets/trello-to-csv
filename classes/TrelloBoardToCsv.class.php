@@ -44,15 +44,15 @@ class TrelloBoardToCsv {
    */
   function json_to_csv() {
     $output = '';
-    $output .= $this->json->name . "\n";
+    $output .= '"' . $this->json->name . '"' . "\n";
     
     foreach ($this->json->lists as $i => $list) {
-      if ($list->closed == FALSE) {
-        $output .= "\n" . $list->name . "\n";
+      if ($list->closed == FALSE && strpos($list->name, 'Complete') !== FALSE) {
+        $output .= "\n" . '"' . $list->name . '"' . "\n";
 
         foreach ($this->json->cards as $j => $card) {
           if ($card->closed == FALSE && $card->idList == $list->id) {
-            $output .= $card->name . "\n";
+            $output .= '"' . $card->name . '"' . "\n";
           }
         }
 
