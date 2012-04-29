@@ -7,13 +7,15 @@ class TrelloBoardToCsv {
   public $filename = '';
   public $json = '';
   public $csv = '';
+  public $list = '';
 
   /**
    * Constructor
    * Checks that the input file exists and kicks off the sequence.
    */
-  function __construct($filename) {
+  function __construct($filename, $list = '') {
     if (file_exists($filename)) {
+      $this->list = $list;
       $this->filename = $filename;
       $this->file_to_json();
       $this->json_to_csv();
@@ -47,18 +49,35 @@ class TrelloBoardToCsv {
     $output .= '"' . $this->json->name . '"' . "\n";
     
     foreach ($this->json->lists as $i => $list) {
-      if ($list->closed == FALSE && strpos($list->name, 'Complete') !== FALSE) {
+      $print_list = FALSE;
+      
+      /**
+       * Test if we should display this list.
+       * Only print open lists,
+       * And if the list title argument is not empty, only print lists that contain
+       * that string.
+       */
+      if ($list->closed == FALSE) {
+        $print_list = TRUE;
+        
+        if ($this->list != '') {
+          if (strpos($list->name, $this->list) === FALSE) {
+            $print_list = FALSE;
+          }
+        }
+      }
+
+      if ($print_list) {
         $output .= "\n" . '"' . $list->name . '"' . "\n";
 
         foreach ($this->json->cards as $j => $card) {
           if ($card->closed == FALSE && $card->idList == $list->id) {
             $output .= '"' . $card->name . '"' . "\n";
           }
-        }
-
+        } // end card foreach
       }
-    }
-    
+    } // end list foreach
+
     $this->csv = $output;
   }
   
